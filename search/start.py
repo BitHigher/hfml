@@ -1,5 +1,5 @@
 #!/usr/bin/python
 
-import search
-c = search.crawler()
+import crawler
+c = crawler.crawler()
 c.crawl(['http://www.sjtu.edu.cn'], 4)
