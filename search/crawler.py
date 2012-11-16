@@ -19,7 +19,7 @@ class crawler:
 
     def createtables(self):
         #create tables
-        self.con.execute('create table urllist(url, outer, pr, newpir)')
+        self.con.execute('create table urllist(url, outer, pr, newpr)')
         self.con.execute('create table wordlist(word)')
         self.con.execute('create table wordlocation(urlid, wordid, location)')
         self.con.execute('create table link(fromid integer, toid integer)')
