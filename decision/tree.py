@@ -112,3 +112,89 @@ def prune(tree, mingain):
         if delta < mingain:
             tree.tb, tree.fb = None, None
             tree.results = uniquecounts(tb+fb)
+
+def getwidth(tree):
+    # count from leaf
+    if tree.tb == None and tree.fb == None: return 1
+    return getwidth(tree.tb) + getwidth(tree.fb)
+
+def getdepth(tree):
+    if tree.tb == None and tree.fb == None: return 0
+    return max(getdepth(tree.tb), getdepth(tree.fb)) + 1
+
+def drawnode(draw, tree, x, y):
+    if tree.results == None:
+        w1 = getwidth(tree.fb) * 100
+        w2 = getwidth(tree.tb) * 100
+
+        left = x-(w1+w2)/2
+        right = x+(w1+w2)/2
+
+        # draw criterion
+        draw.text((x-20, y-10), str(tree.col)+':'+str(tree.value), (0, 0, 0))
+
+        # draw lines to branches
+        draw.line((x, y, left+w1/2, y+100), fill=(255, 0, 0))
+        draw.line((x, y, right-w2/2, y+100), fill=(255, 0, 0))
+
+        # draw branch node
+        drawnode(draw, tree.fb, left+w1/2, y+100)
+        drawnode(draw, tree.tb, right-w2/2, y+100)
+    else:
+        txt = ' \n'.join(['%s:%d' %v for v in tree.results.items()])
+        draw.text((x-20, y), txt, (0, 0, 0))
+
+
+def drawtree(tree, jpeg='tree.jpg'):
+    from PIL import Image, ImageDraw
+    w = getwidth(tree) * 100
+    h = getdepth(tree) * 100 + 120
+    img = Image.new('RGB', (w,h), (255, 255, 255))
+    draw = ImageDraw.Draw(img)
+    drawnode(draw, tree, w/2, 20)
+    img.save(jpeg, 'JPEG')
+
+def classify(observation, tree):
+    # traverse from the root to a particular leaf
+    if tree.results != None:
+        return tree.results
+    else:
+        v = observation[tree.col]
+        branch = None
+        if isinstance(v, int) or isinstance(v, float):
+            if v >= tree.value: branch = tree.tb
+            else: branch = tree.fb
+        else:
+            if v == tree.value: branch = tree.tb
+            else: branch = tree.fb
+        return classify(observation, branch)
+
+
+def mdclassify(observation, tree):
+    if tree.results != None:
+        return tree.results
+    else:
+        v = observation[tree.col]
+        # the value in position tree.col is missed
+        if v == None:
+            tr, fr = mdclassify(observation, tree.tb), mdclassify(observation, tree.fb)
+            # treat all results {'Basic', 'None', 'Premium'} as the small
+            tcount = sum(tr.values())
+            fcount = sum(fr.values())
+            tw = float(tcount) / (tcount+fcount)
+            fw = 1.0 - tw
+            result = {}
+            for k, v in tr.items(): result[k] = v*tw
+            for k, v in fr.items():
+                if k not in result: result[k] = 0
+                result[k] += v*fw
+            return result
+        else:
+            if isinstance(v, int) or isinstance(v, float):
+                if v >= tree.value: branch = tree.tb
+                else: branch = tree.fb
+            else:
+                if v == tree.value: branch = tree.tb
+                else: branch = tree.fb
+            return mdclassify(observation, branch)
+
