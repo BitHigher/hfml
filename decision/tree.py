@@ -56,6 +56,14 @@ def entropy(rows):
         ent -= p * log(p, 2)
     return ent
 
+def variance(rows):
+    total = len(rows)
+    if total == 0: return 0
+    data = [float(row[len(row)-1]) for row in rows]
+    mean = sum(data) / total
+    v = sum([(x - mean)**2 for x in data]) / total
+    return v
+
 def buildtree(rows, scoref=entropy):
     if len(rows) == 0: return treenode()
     current_score = scoref(rows)
@@ -93,12 +101,15 @@ def buildtree(rows, scoref=entropy):
     else:
         return treenode(results=uniquecounts(rows))
 
+
 def prune(tree, mingain):
+    '''merge leaves if the entropy gain is less than mingain '''
     if tree.tb != None and tree.tb.results == None:
         prune(tree.tb, mingain)
     if tree.fb != None and tree.fb.results == None:
         prune(tree.fb, mingain)
 
+    # both branches are leaves
     if tree.tb.results != None and tree.fb.results != None:
         tb, fb = [],[]
         for v, c in tree.tb.results.items():

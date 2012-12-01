@@ -15,7 +15,7 @@ def euclidean(v1, v2):
     for i in range(length):
         d += pow((v1[i] - v2[i]), 2)
     #return sqrt(d)
-    return 1 / float(1+d)
+    return 1 / float(1+sqrt(d))
 
 def cosine(v1, v2):
     length = min(len(v1), len(v2))
