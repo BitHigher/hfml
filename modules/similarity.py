@@ -61,3 +61,7 @@ def pearson(v1, v2):
     
     if d1 == 0 or d2 == 0: return 0
     return cov / sqrt(d1 * d2)
+
+def dotproduct(v1, v2):
+    length = min(len(v1), len(v2))
+    return sum([v1[i] * v2[i] for i in range(length)])
